@@ -1,78 +1,47 @@
-const { ApiError, sendAccountVerificationEmail } = require("../../utils");
-const { findAllStudents, findStudentDetail, findStudentToSetStatus, addOrUpdateStudent } = require("./students-repository");
-const { findUserById } = require("../../shared/repository");
-
-const checkStudentId = async (id) => {
-    const isStudentFound = await findUserById(id);
-    if (!isStudentFound) {
-        throw new ApiError(404, "Student not found");
-    }
-}
-
-const getAllStudents = async (payload) => {
-    const students = await findAllStudents(payload);
-    if (students.length <= 0) {
-        throw new ApiError(404, "Students not found");
-    }
-
+let students = [
+    { id: 1, name: "Juan", age: 21, status: true },
+    { id: 2, name: "Ana", age: 22, status: true },
+  ];
+  
+  let currentId = 3;
+  
+  const getAllStudents = async () => {
     return students;
-}
-
-const getStudentDetail = async (id) => {
-    await checkStudentId(id);
-
-    const student = await findStudentDetail(id);
-    if (!student) {
-        throw new ApiError(404, "Student not found");
+  };
+  
+  const addNewStudent = async (data) => {
+    const newStudent = { id: currentId++, ...data, status: true };
+    students.push(newStudent);
+    return newStudent;
+  };
+  
+  const getStudentDetail = async (id) => {
+    return students.find((student) => student.id === parseInt(id));
+  };
+  
+  const updateStudent = async (id, data) => {
+    const index = students.findIndex((student) => student.id === parseInt(id));
+    if (index !== -1) {
+      students[index] = { ...students[index], ...data };
+      return students[index];
     }
-
-    return student;
-}
-
-const addNewStudent = async (payload) => {
-    const ADD_STUDENT_AND_EMAIL_SEND_SUCCESS = "Student added and verification email sent successfully.";
-    const ADD_STUDENT_AND_BUT_EMAIL_SEND_FAIL = "Student added, but failed to send verification email.";
-    try {
-        const result = await addOrUpdateStudent(payload);
-        if (!result.status) {
-            throw new ApiError(500, result.message);
-        }
-
-        try {
-            await sendAccountVerificationEmail({ userId: result.userId, userEmail: payload.email });
-            return { message: ADD_STUDENT_AND_EMAIL_SEND_SUCCESS };
-        } catch (error) {
-            return { message: ADD_STUDENT_AND_BUT_EMAIL_SEND_FAIL }
-        }
-    } catch (error) {
-        throw new ApiError(500, "Unable to add student");
+    return null;
+  };
+  
+  const setStudentStatus = async (id, status) => {
+    const student = students.find((s) => s.id === parseInt(id));
+    if (student) {
+      student.status = status;
+      return student;
     }
-}
-
-const updateStudent = async (payload) => {
-    const result = await addOrUpdateStudent(payload);
-    if (!result.status) {
-        throw new ApiError(500, result.message);
-    }
-
-    return { message: result.message };
-}
-
-const setStudentStatus = async ({ userId, reviewerId, status }) => {
-    await checkStudentId(userId);
-
-    const affectedRow = await findStudentToSetStatus({ userId, reviewerId, status });
-    if (affectedRow <= 0) {
-        throw new ApiError(500, "Unable to disable student");
-    }
-
-    return { message: "Student status changed successfully" };
-}
-
-module.exports = {
+    return null;
+  };
+  
+  module.exports = {
     getAllStudents,
-    getStudentDetail,
     addNewStudent,
-    setStudentStatus,
+    getStudentDetail,
     updateStudent,
-};
+    setStudentStatus,
+  };
+  

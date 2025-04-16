@@ -1,11 +1,27 @@
 const express = require("express");
+const {
+  handleGetAllStudents,
+  handleAddStudent,
+  handleGetStudentDetail,
+  handleStudentStatus,
+  handleUpdateStudent,
+} = require("./students-controller");
+
 const router = express.Router();
-const studentController = require("./students-controller");
 
-router.get("", studentController.handleGetAllStudents);
-router.post("", studentController.handleAddStudent);
-router.get("/:id", studentController.handleGetStudentDetail);
-router.post("/:id/status", studentController.handleStudentStatus);
-router.put("/:id", studentController.handleUpdateStudent);
+// Ruta para obtener todos los estudiantes
+router.get("/", handleGetAllStudents);
 
-module.exports = { studentsRoutes: router };
+// Ruta para agregar un nuevo estudiante
+router.post("/", handleAddStudent);
+
+// Ruta para obtener el detalle de un estudiante por ID
+router.get("/:id", handleGetStudentDetail);
+
+// Ruta para actualizar un estudiante por ID
+router.put("/:id", handleUpdateStudent);
+
+// Ruta para cambiar el estado (activo/inactivo) de un estudiante
+router.patch("/:id/status", handleStudentStatus);
+
+module.exports = router;
