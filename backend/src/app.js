@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 const cookieParser = require("cookie-parser"); 
 const dotenv = require("dotenv");
@@ -20,3 +22,5 @@ app.use(handle404Error);
 app.use(handleGlobalError);
 
 module.exports = { app };
+
+
